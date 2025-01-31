@@ -5,17 +5,27 @@
   "description": "Encore URL Shortener Tutorial",
   "license": "MPL-2.0",
   "type": "module",
+  "prisma": {
+    "schema": "app/prisma/schema.prisma"
+  },
   "scripts": {
-    "test": "vitest"
+    "db:migrate": "npx prisma migrate dev",
+    "test": "vitest",
+    "postinstall": "npx prisma generate --schema=app/prisma/schema.prisma"
   },
   "devDependencies": {
+    "@types/cookie": "^1.0.0",
+    "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^20.5.7",
-    "@types/react-beautiful-dnd": "^13.1.8",
+    "prisma": "^6.2.1",
     "typescript": "^5.2.2",
     "vitest": "^2.1.4"
   },
   "dependencies": {
-    "encore.dev": "^1.46.1"
+    "@prisma/client": "6.2.1",
+    "cookie": "^1.0.2",
+    "encore.dev": "^1.46.2",
+    "jsonwebtoken": "^9.0.2"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.13.0"
