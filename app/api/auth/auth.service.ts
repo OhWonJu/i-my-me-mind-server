@@ -1,6 +1,4 @@
 import { APIError, ErrCode } from "encore.dev/api";
-import AccountsService from "../common/users/accounts.service";
-import UsersService from "../common/users/users.service";
 import {
   AccessTokenPayload,
   OAuhtAccount,
@@ -8,8 +6,10 @@ import {
   RefreshTokenPayload,
 } from "./auth.interface";
 import jwt from "jsonwebtoken";
-import { CommonResponse } from "../types/commonResponse";
-import { UNAUTHORIZED } from "../lib/errorCodes";
+import { CommonResponse } from "../../types/commonResponse";
+import { UNAUTHORIZED } from "../../lib/errorCodes";
+import UsersService from "../users/users.service";
+import AccountsService from "../users/accounts.service";
 
 interface ConnectAccountResult {
   isLogin: boolean;
@@ -26,7 +26,7 @@ const AuthService = {
   },
 
   generateRefreshToken: (payload: { userId: string; accountkey: string }) => {
-    return jwt.sign(payload, SECRET_KEY, { expiresIn: "1Days" });
+    return jwt.sign(payload, SECRET_KEY, { expiresIn: "30Days" });
   },
 
   authentication: async (data: OAuhtAccount): Promise<ConnectAccountResult> => {
@@ -119,19 +119,14 @@ const AuthService = {
   refreshToken: async (
     refreshTokenDTO: RefreshTokenDTO
   ): Promise<CommonResponse<{ accessToken: string; expiresAt: number }>> => {
-    const { accessToken, refreshToken } = refreshTokenDTO;
+    const { refreshToken } = refreshTokenDTO;
 
-    if (!accessToken || !refreshToken)
+    if (!refreshToken)
       return {
         ok: false,
         errorMessage: UNAUTHORIZED.NOT_AUTHORIZED.message,
         errorCode: UNAUTHORIZED.NOT_AUTHORIZED.code,
       };
-
-    const decodedAccesToken = jwt.verify(
-      accessToken,
-      SECRET_KEY
-    ) as AccessTokenPayload;
 
     const decodedRefreshToken = jwt.verify(
       refreshToken,
@@ -151,28 +146,16 @@ const AuthService = {
     }
 
     const userIdByRefreshToken = decodedRefreshToken.userId;
-    const userIdByAccessToken = decodedAccesToken.userId;
 
     const { data: userByRefreshToken } = await UsersService.findUser({
       id: userIdByRefreshToken,
     });
-    const { data: userByAccessToken } = await UsersService.findUser({
-      id: userIdByAccessToken,
-    });
 
-    if (!userByRefreshToken || !userByAccessToken) {
+    if (!userByRefreshToken) {
       return {
         ok: false,
         errorMessage: UNAUTHORIZED.INVALID_USER.message,
         errorCode: UNAUTHORIZED.INVALID_ACCOUNT.code,
-      };
-    }
-
-    if (userByRefreshToken.id !== userByAccessToken.id) {
-      return {
-        ok: false,
-        errorMessage: UNAUTHORIZED.INVALID_USER_MATCH.message,
-        errorCode: UNAUTHORIZED.INVALID_USER_MATCH.code,
       };
     }
 

@@ -21,7 +21,7 @@ export interface OAuhtAccount {
 }
 
 export interface AuthResponse {
-  immmd_key?: number;
+  immmd_key?: Header<"Set-cookie">;
   immmd_access_token?: Header<"Set-cookie">;
   immmd_refresh_token?: Header<"Set-cookie">;
 }
@@ -33,7 +33,6 @@ export interface ReAuthResponse extends AuthResponse {
 }
 
 export interface RefreshTokenDTO {
-  readonly accessToken: string;
   readonly refreshToken: string;
 }
 

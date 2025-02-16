@@ -14,17 +14,20 @@ const SECRET_KEY = process.env.JWT_SECRET as string;
 
 export const auth = authHandler<AuthParams, AuthData>(async ({ cookies }) => {
   const { immmd_access_token: accessToken } = cookie.parse(cookies);
-
   // if (!accessToken) throw APIError.unauthenticated("bad credentials");
 
   if (!accessToken) return null;
 
-  const { userId, exp } = jwt.verify(
-    accessToken,
-    SECRET_KEY
-  ) as AccessTokenPayload;
+  try {
+    const { userId, exp } = jwt.verify(
+      accessToken,
+      SECRET_KEY
+    ) as AccessTokenPayload;
 
-  return { accessToken, userID: userId, exp };
+    return { accessToken, userID: userId, exp };
+  } catch {
+    return null;
+  }
 });
 
 export const gateway = new Gateway({
